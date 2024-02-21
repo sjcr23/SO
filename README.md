@@ -1,3 +1,9 @@
 # SO
 ---
-cosas de sistemas operativos
+Cosas de sistemas operativos
+
+comando para compilar y ejecutar
+
+```bash
+gcc file.c -o out && ./out
+```
