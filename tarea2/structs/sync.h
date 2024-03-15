@@ -4,20 +4,43 @@
 #include <pthread.h>
 
 
+/**
+ * QUEUE
+*/
+typedef struct Node {
+    int pid;
+    struct Node *next;
+} Node;
+
 
 typedef struct {
+    Node *head;
+    Node *tail;
+} Queue;
+
+Queue* createQueue();
+void enqueue(Queue *queue, int data);
+int dequeue(Queue *queue);
+int isEmpty(Queue *queue);
+
+
+/**
+ * SEMAPHORE 
+*/
+typedef struct {
     int count;
-    pthread_mutex_t mutex;
-    pthread_cond_t cond;
+    Queue *queue;
+    Queue *blocked_queue;
 } Semaphore;
 
-void semaphore_init(Semaphore *sem, int initial_count);
-void semaphore_wait(Semaphore *sem);
+Semaphore *createSemaphore(int slots);
+void acquire_semaphore(Semaphore *sem, int pid);
 void semaphore_signal(Semaphore *sem);
 
 
-
-
+/**
+ * BARRIER 
+*/
 typedef struct {
     int count;
     int max_count;
@@ -29,7 +52,9 @@ void barrier_init(Barrier *barrier, int count);
 void barrier_wait(Barrier *barrier);
 
 
-
+/**
+ * MONITOR 
+*/
 typedef struct {
     int data;
     pthread_mutex_t mutex;

@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include "semaphore.c"
-#include "barrier.c"
-#include "monitor.c"
+#include "structs/semaphore.c"
+#include "structs/barrier.c"
+#include "structs/monitor.c"
 
 #define NUM_THREADS 5
 
