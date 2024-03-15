@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "structs/queue.c"
 #include "structs/semaphore.c"
-#include "structs/barrier.c"
-#include "structs/monitor.c"
+
+Semaphore *sem;
+
 
 
 void testQueue(){
@@ -17,34 +19,48 @@ void testQueue(){
     while (!isEmpty(queue)) {
         printf("%d ", dequeue(queue));
     }
+
     printf("\n");
     // Liberar la memoria de la cola
     free(queue);
-
     
 }
 
+void *thread_acquire_sem(void *arg) {
+    pid_t pid = *(pid_t *)arg;
+    
+    // Entran
+    acquire_semaphore(sem, pid);
+
+    // Salen
+    sleep((rand() % (5 - 1 + 1)) + 1);
+    release_Semaphore(sem);
 
 
-void testSem(){
-    // Tamaño del semáforo
-    int slots = 3;
-    Semaphore *sem = createSemaphore(slots);
 
-    // Procesos por atender
-    int attends = slots*2;
-    int pids[attends];
-    for (int i = 0; i < attends; i++){
-        pids[i] = i;
-        acquire_semaphore(sem, pids[i]);   // Acá piden ser atendidos
+;
+    sem = createSemaphore(slots);
+
+    // Inicializar los procesos por atender
+    int attends = slots*3;
+    pid_t tids[attends];
+    pthread_t threads[attends];
+
+    // Crear ids
+    for (int i = 0; i < attends; i++) {
+        tids[i] = i;
     }
     
-    // 3 out
-    printf("\n");
-    release_Semaphore(sem);
-    release_Semaphore(sem);
-    release_Semaphore(sem);
-    free(sem);
+    // Crear hilos
+    for (int i = 0; i < attends; i++) {
+        
+        pthread_create(&threads[i], NULL, thread_acquire_sem, &tids[i]);
+    }
+
+    // Esperar a que terminen
+    for (int i = 0; i < attends; i++) {
+        pthread_join(threads[i], NULL);
+    }
 }
 
 int main() {

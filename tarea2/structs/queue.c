@@ -39,7 +39,7 @@ void enqueue(Queue *queue, int pid) {
 int dequeue(Queue *queue) {
     // Cola vacía
     if (queue->head == NULL) {
-        printf("Error: La cola está vacía.\n");
+        printf("La cola está vacía.\n");
         exit(EXIT_FAILURE);
     }
     

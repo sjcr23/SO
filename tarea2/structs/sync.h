@@ -34,7 +34,7 @@ typedef struct {
 } Semaphore;
 
 Semaphore *createSemaphore(int slots);
-void acquire_semaphore(Semaphore *sem, int pid);
+void acquire_semaphore(Semaphore *sem, pid_t pid);
 void semaphore_signal(Semaphore *sem);
 
 
@@ -56,15 +56,17 @@ void barrier_wait(Barrier *barrier);
  * MONITOR 
 */
 typedef struct {
-    int data;
     pthread_mutex_t mutex;
     pthread_cond_t cond;
+    int count;
 } Monitor;
 
 void monitor_init(Monitor *monitor);
-void monitor_enter(Monitor *monitor);
+void increment(Monitor *monitor);
+void decrement(Monitor *monitor);
+/* void monitor_enter(Monitor *monitor);
 void monitor_exit(Monitor *monitor);
 void monitor_wait(Monitor *monitor);
-void monitor_notify(Monitor *monitor);
+void monitor_notify(Monitor *monitor); */
 
 #endif /* sync_h */

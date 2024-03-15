@@ -1,7 +1,6 @@
 #include <pthread.h>
+#include <stdio.h>
 #include "sync.h"
-
-
 
 void barrier_init(Barrier *barrier, int count) {
     barrier->count = 0;
@@ -13,13 +12,14 @@ void barrier_init(Barrier *barrier, int count) {
 void barrier_wait(Barrier *barrier) {
     pthread_mutex_lock(&barrier->mutex);
     barrier->count++;
+    printf("Thread reached the barrier. Count: %d\n", barrier->count);
     if (barrier->count >= barrier->max_count) {
-        barrier->count = 0;
+        printf("Last thread reached the barrier. Broadcasting...\n");
         pthread_cond_broadcast(&barrier->cond);
     } else {
-        while (barrier->count < barrier->max_count) {
-            pthread_cond_wait(&barrier->cond, &barrier->mutex);
-        }
+        printf("Waiting at the barrier...\n");
+        pthread_cond_wait(&barrier->cond, &barrier->mutex);
     }
     pthread_mutex_unlock(&barrier->mutex);
+    printf("Thread passed the barrier.\n");
 }

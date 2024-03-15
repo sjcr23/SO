@@ -17,7 +17,7 @@ Semaphore *createSemaphore(int slots) {
     return sem;
 } 
 
-void acquire_semaphore(Semaphore *sem, int pid) {
+void acquire_semaphore(Semaphore *sem, pid_t pid) {
     // Mae aún hay campo, éntrele sin miedo
     if(sem->count > 0){
         sem->count--;
@@ -32,8 +32,7 @@ void acquire_semaphore(Semaphore *sem, int pid) {
 }
 
 void release_Semaphore(Semaphore *sem) {
-    // Para morir sólo hace falta estar vivo
-    // (para que la cola se desocupe sólo hace falta que esté llena)
+    // Para que la cola se desocupe sólo hace falta que esté llena
     if(sem->count == 0){
         sem->count++;
         printf("PID: %d released Sem.  ->  ", dequeue(sem->queue));
