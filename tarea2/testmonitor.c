@@ -1,43 +1,47 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <pthread.h>
+#include <stdio.h>
 
 #include "structs/sync.h"
 
-#define NUM_THREADS 5
+#define DATA_SIZE 20
 
-
-// Funciṕn para el hilo productor
-void *productor(void *arg) {
-    Monitor *monitor = (Monitor *)arg;
-    while (1) {
-        increment(monitor);
+// Función de hilo para el productor
+void *producer_thread(void *arg) {
+    Monitor *mon = (Monitor *)arg;
+    // Produce datos en el monitor
+    for (int i = 0; i < DATA_SIZE; i++) {
+        produce(mon, i);
+        // Imprime el dato producido
+        printf("Produced: %d\n", i);
     }
-    return NULL;
+    pthread_exit(NULL);
 }
 
-// Función para el hilo consumidor
-void *consumidor(void *arg) {
-    Monitor *monitor = (Monitor *)arg;
-    while (1) {
-        decrement(monitor);
+// Función de hilo para el consumidor
+void *consumer_thread(void *arg) {
+    Monitor *mon = (Monitor *)arg;
+    // Consume datos del monitor
+    for (int i = 0; i < DATA_SIZE; i++) {
+        int data = consume(mon);
+        // Imprime el dato consumido
+        printf("Consumed: %d\n", data);
     }
+    pthread_exit(NULL);
 }
 
+// Función principal
 int main() {
-    pthread_t prod_tid, cons_tid;
+    pthread_t producer, consumer;
     Monitor monitor;
+    monitor_init(&monitor); // Inicializa el monitor
 
-    // Inicializar el monitor
-    monitor_init(&monitor);
+    // Crear hilos para productor y consumidor
+    pthread_create(&producer, NULL, producer_thread, &monitor);
+    pthread_create(&consumer, NULL, consumer_thread, &monitor);
 
-    // Crear hilos productor y consumidor
-    pthread_create(&prod_tid, NULL, productor, &monitor);
-    pthread_create(&cons_tid, NULL, consumidor, &monitor);
-
-    // Esperar a que los hilos terminen (esto nunca sucederá)
-    pthread_join(prod_tid, NULL);
-    pthread_join(cons_tid, NULL);
+    // Esperar a que los hilos terminen
+    pthread_join(producer, NULL);
+    pthread_join(consumer, NULL);
 
     return 0;
 }
