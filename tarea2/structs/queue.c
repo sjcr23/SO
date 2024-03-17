@@ -15,7 +15,7 @@ Queue* createQueue() {
 }
 
 // Función para encolar un elemento en la cola
-void enqueue(Queue *queue, int pid) {
+void enqueue(Queue *queue, pid_t pid) {
     // Crear el nodo
     Node *newNode = (Node*)calloc(1, sizeof(Node));
     if (newNode == NULL) {
@@ -36,7 +36,7 @@ void enqueue(Queue *queue, int pid) {
 }
 
 // Función para desencolar un elemento de la cola
-int dequeue(Queue *queue) {
+pid_t dequeue(Queue *queue) {
     // Cola vacía
     if (queue->head == NULL) {
         printf("La cola está vacía.\n");

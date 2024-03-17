@@ -8,7 +8,7 @@
  * QUEUE
 */
 typedef struct Node {
-    int pid;
+    pid_t pid;
     struct Node *next;
 } Node;
 
@@ -19,8 +19,8 @@ typedef struct {
 } Queue;
 
 Queue* createQueue();
-void enqueue(Queue *queue, int data);
-int dequeue(Queue *queue);
+void enqueue(Queue *queue, pid_t data);
+pid_t dequeue(Queue *queue);
 int isEmpty(Queue *queue);
 
 
@@ -35,7 +35,7 @@ typedef struct {
 
 Semaphore *createSemaphore(int slots);
 void acquire_semaphore(Semaphore *sem, pid_t pid);
-void semaphore_signal(Semaphore *sem);
+void release_Semaphore(Semaphore *sem);
 
 
 /**

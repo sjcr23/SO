@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include "sync.h"
 
-// Función para inicializar un semáforo
+// Crear un semáforo en memoria
 Semaphore *createSemaphore(int slots) {
     Semaphore *sem = calloc(1, sizeof(Semaphore));
     if (sem == NULL) {
@@ -16,19 +16,16 @@ Semaphore *createSemaphore(int slots) {
     sem->blocked_queue = createQueue();
     return sem;
 } 
-/**
- * [ACQUIRE]
- * [RELEASE]
- * [WAITING]
-*/
+
+// Solicitar al semáforo acceso a recursos
 void acquire_semaphore(Semaphore *sem, pid_t pid) {
-    // Mae aún hay campo, éntrele sin miedo
+    // Permitir el acceso si queda campo en la cola
     if(sem->count > 0){
         sem->count--;
         printf("ACQUIRE: [PID %d]\n", pid);
         enqueue(sem->queue, pid);
     }
-    // Mae ya no hay campo, vaya a esperar
+    // Denegar el acceso si no queda campo
     else {
         printf("WAITING: [PID %d]\n", pid);
         enqueue(sem->blocked_queue, pid);
@@ -36,13 +33,12 @@ void acquire_semaphore(Semaphore *sem, pid_t pid) {
 }
 
 void release_Semaphore(Semaphore *sem) {
-    // Para que la cola se desocupe sólo hace falta que esté llena
+    // Permitir acceso cuando la cola esté libre
     if(sem->count == 0){
         sem->count++;
         printf("RELEASE: [PID %d] -> ", dequeue(sem->queue));
         
-        // Mae meta al siguiente en la vara xd
-        int first_blocked = dequeue(sem->blocked_queue);
+        pid_t first_blocked = dequeue(sem->blocked_queue);
         acquire_semaphore(sem, first_blocked);
     }
 }
