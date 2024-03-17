@@ -16,17 +16,21 @@ Semaphore *createSemaphore(int slots) {
     sem->blocked_queue = createQueue();
     return sem;
 } 
-
+/**
+ * [ACQUIRE]
+ * [RELEASE]
+ * [WAITING]
+*/
 void acquire_semaphore(Semaphore *sem, pid_t pid) {
     // Mae aún hay campo, éntrele sin miedo
     if(sem->count > 0){
         sem->count--;
-        printf("PID: %d acquired Sem.\n", pid);
+        printf("ACQUIRE: [PID %d]\n", pid);
         enqueue(sem->queue, pid);
     }
     // Mae ya no hay campo, vaya a esperar
     else {
-        printf("PID: %d is now waiting. (Sem is full)\n", pid);
+        printf("WAITING: [PID %d]\n", pid);
         enqueue(sem->blocked_queue, pid);
     }
 }
@@ -35,7 +39,7 @@ void release_Semaphore(Semaphore *sem) {
     // Para que la cola se desocupe sólo hace falta que esté llena
     if(sem->count == 0){
         sem->count++;
-        printf("PID: %d released Sem.  ->  ", dequeue(sem->queue));
+        printf("RELEASE: [PID %d] -> ", dequeue(sem->queue));
         
         // Mae meta al siguiente en la vara xd
         int first_blocked = dequeue(sem->blocked_queue);

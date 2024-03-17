@@ -22,8 +22,7 @@ void testQueue(){
 
     printf("\n");
     // Liberar la memoria de la cola
-    free(queue);
-    
+    free(queue); 
 }
 
 void *thread_acquire_sem(void *arg) {
@@ -32,13 +31,14 @@ void *thread_acquire_sem(void *arg) {
     // Entran
     acquire_semaphore(sem, pid);
 
-    // Salen
     sleep((rand() % (5 - 1 + 1)) + 1);
+
+    // Salen
     release_Semaphore(sem);
+}
 
-
-
-;
+void testSem(){
+    int slots = 3;
     sem = createSemaphore(slots);
 
     // Inicializar los procesos por atender
@@ -53,10 +53,9 @@ void *thread_acquire_sem(void *arg) {
     
     // Crear hilos
     for (int i = 0; i < attends; i++) {
-        
         pthread_create(&threads[i], NULL, thread_acquire_sem, &tids[i]);
     }
-
+    
     // Esperar a que terminen
     for (int i = 0; i < attends; i++) {
         pthread_join(threads[i], NULL);
