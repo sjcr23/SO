@@ -1,7 +1,5 @@
 # Biblioteca Sync
 
----
-
 ## Desarollada por
 - 2016101574 - Josué Castro Ramírez
 - 2020065036 - Adrián Amador
@@ -9,9 +7,9 @@
 
 
 ## Estructuras
-- [Semáforo](#Semáforo)
-- [Barrera](#Barrera)
-- [Monitor](#Monitor)
+- [Semáforo](##Semáforo)
+- [Barrera](##Barrera)
+- [Monitor](##Monitor)
 
 ## Semáforo
 texto
