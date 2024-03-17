@@ -1,8 +1,10 @@
-# SO
+# IC6600 - Sistemas Operativos
 ---
-Cosas de sistemas operativos
 
-comando para compilar y ejecutar
+Espacio para almacenar los distintos materiales y entregas del curso.
+
+
+**Comando utilizado para compilar y ejecutar:**
 
 ```bash
 gcc file.c -o out && ./out
