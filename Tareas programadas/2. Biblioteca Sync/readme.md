@@ -67,10 +67,10 @@ typedef struct {
 ```
 
 **Atributos:**
-- `pid:` id del proceso
-- `next:` nodo al que apunta un nodo.
-- `head:` inicio de la cola.
-- `tail:` final de la cola.
+- `pid` : id del proceso
+- `next` : nodo al que apunta un nodo.
+- `head` : inicio de la cola.
+- `tail` : final de la cola.
 
 ### Funciones implementadas
 Para esta tarea fue necesario implementar una cola para llevar el control de los procesos, para ello se implementaron los siguientes métodos, los cuáles puede ver en detalle en el archivo: [queue.c](https://github.com/sjcr23/SO/blob/main/Tareas%20programadas/2.%20Biblioteca%20Sync/structs/queue.c)
@@ -113,13 +113,13 @@ typedef struct {
 ```
 
 **Atributos:**
-- `count:` tamaño del semáforo, es decir, la cantidad de hilos que puede antender.
-- `queue:` cola de hilos que están siendo atendidos.
-- `blocked_queue:` cola de hilos que están en espera.
+- `count` : tamaño del semáforo, es decir, la cantidad de hilos que puede antender.
+- `queue` : cola de hilos que están siendo atendidos.
+- `blocked_queue` : cola de hilos que están en espera.
 
 
 ### Funciones implementadas
-- `acquire_semaphore(): ` Valida si hay campo en la cola de atendidos, de haber espacio encola el hilo solicitante, si no caso, lo encola en la lista de los que están en espera.
+- `acquire_semaphore()` : Valida si hay campo en la cola de atendidos, de haber espacio encola el hilo solicitante, si no caso, lo encola en la lista de los que están en espera.
     ```C
     void acquire_semaphore(Semaphore *sem, pid_t pid) {
         if(sem->count > 0){
@@ -131,7 +131,7 @@ typedef struct {
         }
     }
     ```
-- `release_semaphore(): ` Valida que no hay campo en la cola de atendidos, cuando sucede suelta al primero de la cola atendida e inmediatamente encola al siguiente de la cola de espera.
+- `release_semaphore()` : Valida que no hay campo en la cola de atendidos, cuando sucede suelta al primero de la cola atendida e inmediatamente encola al siguiente de la cola de espera.
     ```C
     void release_semaphore(Semaphore *sem) {
         if(sem->count == 0){
