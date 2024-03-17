@@ -5,12 +5,8 @@
 #include "sync.h"
 
 // Crear un semáforo en memoria
-Semaphore *createSemaphore(int slots) {
+Semaphore *create_semaphore(int slots) {
     Semaphore *sem = calloc(1, sizeof(Semaphore));
-    if (sem == NULL) {
-        printf("Error: No se pudo asignar memoria para el semáforo.\n");
-        exit(EXIT_FAILURE);
-    }
     sem->count = slots;
     sem->queue = createQueue();
     sem->blocked_queue = createQueue();
@@ -32,13 +28,18 @@ void acquire_semaphore(Semaphore *sem, pid_t pid) {
     }
 }
 
-void release_Semaphore(Semaphore *sem) {
+void release_semaphore(Semaphore *sem) {
     // Permitir acceso cuando la cola esté libre
     if(sem->count == 0){
         sem->count++;
         printf("RELEASE: [PID %d] -> ", dequeue(sem->queue));
-        
-        pid_t first_blocked = dequeue(sem->blocked_queue);
-        acquire_semaphore(sem, first_blocked);
+    
+        if(!isEmpty(sem->blocked_queue)){
+            pid_t first_blocked = dequeue(sem->blocked_queue);
+            acquire_semaphore(sem, first_blocked);
+        }
+        else {
+            printf("La cola está vacía\n");
+        }
     }
 }

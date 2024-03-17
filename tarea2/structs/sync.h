@@ -3,7 +3,6 @@
 
 #include <pthread.h>
 
-
 /**
  * QUEUE
 */
@@ -11,7 +10,6 @@ typedef struct Node {
     pid_t pid;
     struct Node *next;
 } Node;
-
 
 typedef struct {
     Node *head;
@@ -24,6 +22,7 @@ pid_t dequeue(Queue *queue);
 int isEmpty(Queue *queue);
 
 
+
 /**
  * SEMAPHORE 
 */
@@ -33,9 +32,10 @@ typedef struct {
     Queue *blocked_queue;
 } Semaphore;
 
-Semaphore *createSemaphore(int slots);
+Semaphore *create_semaphore(int slots);
 void acquire_semaphore(Semaphore *sem, pid_t pid);
-void release_Semaphore(Semaphore *sem);
+void release_semaphore(Semaphore *sem);
+
 
 
 /**
@@ -48,8 +48,9 @@ typedef struct {
     pthread_cond_t cond;
 } Barrier;
 
-void barrier_init(Barrier *barrier, int count);
-void barrier_wait(Barrier *barrier);
+Barrier *create_barrier(int count);
+void barrier_wait(Barrier *barrier, pid_t pid);
+
 
 
 /**
@@ -59,18 +60,18 @@ void barrier_wait(Barrier *barrier);
 
 // Estructura para el monitor
 typedef struct {
-    int buffer[BUFFER_SIZE]; // Buffer para almacenar los datos
-    int count; // Contador de elementos en el buffer
-    int in; // Índice de inserción en el buffer
-    int out; // Índice de extracción del buffer
-    pthread_mutex_t mutex; // Mutex para garantizar la exclusión mutua
-    pthread_cond_t not_full; // Variable de condición para señalar cuando el buffer no está lleno
-    pthread_cond_t not_empty; // Variable de condición para señalar cuando el buffer no está vacío
+    int buffer[BUFFER_SIZE];
+    int count;
+    int in;
+    int out;
+    pthread_mutex_t mutex;
+    pthread_cond_t not_full;
+    pthread_cond_t not_empty;
 } Monitor;
 
 // Funciones para el monitor
-void monitor_init(Monitor *mon); // Inicializa el monitor
-void produce(Monitor *mon, int data); // Función para que el productor produzca datos y los inserte en el buffer
-int consume(Monitor *mon); // Función para que el consumidor extraiga datos del buffer
+Monitor *create_monitor();
+void produce(Monitor *mon, int data);
+int consume(Monitor *mon);
 
 #endif /* sync_h */

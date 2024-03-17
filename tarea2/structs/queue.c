@@ -40,7 +40,7 @@ pid_t dequeue(Queue *queue) {
     // Cola vacía
     if (queue->head == NULL) {
         printf("La cola está vacía.\n");
-        exit(EXIT_FAILURE);
+        exit(EXIT_SUCCESS);
     }
     
     // Sacar de la cola
