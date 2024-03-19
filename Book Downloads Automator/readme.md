@@ -21,8 +21,14 @@ A script to download a certain list of books from [Project Gutenberg](https://ww
 
 ## Usage
 
-1. Create a folder named `output` int the same directory level with `downloader.py`
-2. Run  `downloader.py`
+1. Create a folder named `output` in the same directory level with `downloader.py`, or just make sure that the variable `resources_path` has the same name as the output folder created.
+
+    ```python
+    # Directory to file storage "output"
+    resources_path = "output"
+    ```
+
+3. Run  `downloader.py`
 
     ```bash
     python downloader.py
