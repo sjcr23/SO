@@ -46,7 +46,7 @@ void testQueue(){
 void *acquire_sem(void *arg) {
     pid_t pid = *(pid_t *)arg;
     acquire_semaphore(sem, pid);
-    sleep((rand() % (3 - 1 + 1)) + 1);
+    sleep((rand() % (6 - 2 + 1)) + 3);
     release_semaphore(sem);
     pthread_exit(NULL);
 }
@@ -65,6 +65,7 @@ void testSem(){
     // Crear hilos e IDs
     for (int i = 0; i < attends; i++) {
         tids[i] = i;
+        sleep(1);
         pthread_create(&threads[i], NULL, acquire_sem, &tids[i]);
     }
     // Esperar a que terminen
