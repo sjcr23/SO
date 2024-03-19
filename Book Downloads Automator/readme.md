@@ -17,6 +17,8 @@ A script to download a certain list of books from [Project Gutenberg](https://ww
 - [Google Chrome](https://www.google.com/chrome/)
 - [Google Chrome web driver](https://chromedriver.chromium.org/downloads)
 
+> Note: In this repository is already included the [ChromeDriver 114.0.5735.90](https://chromedriver.storage.googleapis.com/index.html?path=114.0.5735.90/). For the future, you may update the driver or your Google Chromes's version.
+
 ## Usage
 
 1. Create a folder named `output` int the same directory level with `downloader.py`
