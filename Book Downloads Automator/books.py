@@ -2,7 +2,7 @@ url = "https://www.gutenberg.org/browse/scores/top#books-last30"
 
 
 top30 = [
-    "Frankenstein; Or, The Modern Prometheus by Mary Wollstonecraft Shelley (95474)",
+    "Frankenstein; Or, The Modern Prometheus by Mary Wollstonecraft Shelley (100387)",
     "Pride and Prejudice by Jane Austen (73639)",
     "Moby Dick; Or, The Whale by Herman Melville (64713)",
     "Romeo and Juliet by William Shakespeare (61672)",

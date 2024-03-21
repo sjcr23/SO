@@ -6,6 +6,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 import codecs
 import books
 import logging
+import time
+
 
 def load_logger(name):
     logger = logging.getLogger(name)
@@ -37,8 +39,7 @@ resources_path = "output"
 logger = load_logger("top30 downloads")
 
 # Selenium configs
-service = Service(executable_path="chromedriver.exe")
-driver = webdriver.Chrome(service=service)
+driver = webdriver.Chrome()
 
 # Open website
 driver.get(books.url)
@@ -46,9 +47,17 @@ driver.get(books.url)
 # Book file type for download
 format_type = "Plain Text UTF-8"
 
-for name in books.top30:
-    # Open book in new tab
-    book_link = driver.find_element(By.LINK_TEXT, name)
+for i in range(1, 101):
+    books_XPATH= f'/html/body/div[1]/div/ol[5]/li[{i}]'
+    suffix = "/a[1]"
+
+    # First book XPATH is different to the others
+    if i == 1:
+        suffix = "/a[2]"
+
+    # Open book page
+    book_link = driver.find_element(By.XPATH, books_XPATH + suffix)
+    name = book_link.accessible_name
     book_link.click()
     not_founded = False
 
