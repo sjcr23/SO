@@ -42,7 +42,8 @@ logger = load_logger("top30 downloads")
 driver = webdriver.Chrome()
 
 # Open website
-driver.get(books.url)
+url = "https://www.gutenberg.org/browse/scores/top#books-last30"
+driver.get(url)
 
 # Book file type for download
 format_type = "Plain Text UTF-8"
