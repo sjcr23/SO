@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<!-- Exra code here -->
+{% endblock %}}
+
+{% block body %}
+
+<div id="controls">
+    <div>
+        <label for="algSelector" style="font-weight: bold;">Algorithm </label>
+        <select id="algSelector">
+            <option value="FIFO">FIFO</option>
+            <option value="SC">SC</option>
+            <option value="MRU">MRU</option>
+            <option value="RND">RND</option>
+        </select>
+    </div>
+</div>
+<div class="container">
+    <div class="column column1">
+        <h2>Simulation file</h2>
+        <div>
+            <input type="file" id="fileInput" name="file">
+        </div>
+        <br>
+        <button id="saveConfigs">Save setup</button> 
+    </div>
+    <div class="column column1">
+        <h2>Generate a random simulation file</h2>
+        <div class="input-container">
+            <label for="seedInput">Seed</label>
+            <input type="number" id="seedInput" name="seed">
+            
+            <label for="numProcess">Processes</label>
+            <input type="number" id="numProcess" name="processes">
+
+            <label for="numInstructions">Instructions</label>
+            <input type="number" id="numInstructions" name="instructions">
+            
+            
+        </div>
+        <br>
+        <button id="createButton">Create File</button> 
+        <button id="downloadButton">Download File</button> 
+    </div>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</div>
+
+{% endblock %}}
