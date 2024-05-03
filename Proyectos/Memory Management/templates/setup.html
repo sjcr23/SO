@@ -26,7 +26,7 @@
         <br>
         <button id="saveConfigs">Save setup</button> 
     </div>
-    <div class="column column1">
+    <div id="generation" class="column column1">
         <h2>Generate a random simulation file</h2>
         <div class="input-container">
             <label for="seedInput">Seed</label>
@@ -37,12 +37,10 @@
 
             <label for="numInstructions">Instructions</label>
             <input type="number" id="numInstructions" name="instructions">
-            
-            
         </div>
         <br>
         <button id="createButton">Create File</button> 
-        <button id="downloadButton">Download File</button> 
+        <button onclick="window.location.href='/download-file'">Download File</button>
     </div>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </div>

@@ -68,7 +68,12 @@ document.getElementById('createButton').addEventListener('click', function() {
     const seedInput = document.getElementById('seedInput').value;
     const numProcess = document.getElementById('numProcess').value;
     const numInstructions = document.getElementById('numInstructions').value;
-
+    
+    const container = document.getElementById('generation')
+    const msg = document.createElement('p');
+    msg.style = "font-family: monospace;"
+    msg.textContent = `File generated: {alg:${algSelector}, seed:${seedInput}, P:${numProcess}, N:${numInstructions}}`
+    container.appendChild(msg)
     const data = {
         algorithm: algSelector,
         seed: seedInput,

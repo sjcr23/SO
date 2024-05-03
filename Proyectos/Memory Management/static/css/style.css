@@ -48,15 +48,15 @@ button {
     padding: 10px;
     font-size: 16px;
     cursor: pointer;
-    background: rgba(107,9,121,1);
+    background: #3B3769;
     color: #fff;
     border-color: transparent;
     border-radius: 4px;
 }
 
 button:hover {
-    background-color: #ddd;
-    color: black;
+    background-color: #0056b3;;
+    color: white;
 }
 
 select {
@@ -75,7 +75,7 @@ select:hover, input:hover {
     justify-content: center;
     align-items: center;    
     overflow: hidden;
-    background: rgba(107,9,121,1);
+    background: #332F63;
     font-style: bold;
     font-size: large;
 }

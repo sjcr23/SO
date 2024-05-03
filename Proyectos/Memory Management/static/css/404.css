@@ -1,0 +1,42 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #28254C;
+  color: #fff;
+  font-family: 'Arial', sans-serif;
+  text-align: center;
+
+}
+
+.container {
+  width: 90%;  /* Ajusta el ancho según necesidad */
+}
+
+.container h1 {
+  font-size: 48px; /* Tamaño más grande para el 404 */
+  margin-bottom: 20px; /* Espacio debajo del 404 */
+}
+
+.container p {
+  font-size: 24px; /* Tamaño apropiado para la descripción */
+  margin-bottom: 20px; /* Espacio debajo del párrafo */
+}
+
+.container a {
+  color: #fff;
+  background-color: #3B3769;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 18px;
+  transition: background-color 0.3s;
+}
+
+.container a:hover {
+  background-color: #0056b3;
+}
