@@ -65,27 +65,25 @@ class MemoryManagementUnit:
         return virtual_page
     
     def delete_memory(self, pid):
-        if pid in self.memory_map:
-            pages = self.memory_map[pid]
-            for page in pages:
-                if page.in_real_memory:
-                    self.real_memory[page.physical_address] = None
-                else:
-                    self.virtual_memory.remove(page)
-            del self.memory_map[pid]
+        if pid in self.pointer_map:
+            ptr = self.pointer_map.pop(pid)
+            if ptr in self.memory_map:
+                pages = self.memory_map[ptr]
+                for page in pages:
+                    if page.in_real_memory:
+                        self.real_memory[page.physical_address] = None
+                    else:
+                        self.virtual_memory.remove(page)
+                del self.memory_map[ptr]
 
 # test
 mmu = MemoryManagementUnit(400*1024, 4096)
 print("real memory ", len(mmu.real_memory))
 mmu.execute_instruction('new(1, 24576)')
 print("Memory map for pid 1: ", mmu.memory_map[mmu.pointer_map[1]])
-mmu.delete_memory(1)
-if 1 in mmu.memory_map:
-    print("Memory map for pid 1: ", mmu.memory_map[mmu.pointer_map[1]])
-else:
-    print("There is not memory associated to the PID 1")
-
 mmu.execute_instruction('new(2, 4096)')
+mmu.delete_memory(1)
 mmu.execute_instruction('new(3, 4096)')
 mmu.execute_instruction('new(4, 4096)')
 mmu.execute_instruction('new(1, 24576)')
+mmu.delete_memory(5)
