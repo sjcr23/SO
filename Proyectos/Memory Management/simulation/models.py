@@ -2,7 +2,7 @@
 from mmu import MemoryManagementUnit as MMU
 
 class Computer:
-    def __init__(self, num_cores=1, ips=1, disk_access_time=5, ram_size=400*1024, page_size=4096) -> None:
+    def __init__(self, num_cores=1, ips=1, disk_access_time=5, ram_size=400*1024, page_size=4096):
         self.num_cores = num_cores
         self.ips = ips # instructions per second
         self.disk_access_time = disk_access_time
@@ -19,7 +19,7 @@ class Computer:
 
 
 class Process:
-    def __init__(self, pid) -> None:
+    def __init__(self, pid):
         self.pid = pid
         self.instructions = []
     
@@ -27,9 +27,3 @@ class Process:
         self.instructions.append(instruction)
 
     
-class Page:
-    def __init__(self) -> None:
-        self.id = None
-        self.address = None
-        self.in_real_memory = False
-        # add more attributes as needed
