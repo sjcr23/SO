@@ -13,7 +13,7 @@ def generate_file(data):
         file.write(processes + "\n")
         file.write(instructions + "\n")
     file.close()
-    return f'File generated succesfully in {file_path}'
+    return f'File generated successfully in {file_path}'
 
 @app.route('/')
 def home():
