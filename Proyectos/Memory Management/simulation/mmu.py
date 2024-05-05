@@ -12,18 +12,22 @@ class MemoryManagementUnit:
         self.page_size = page_size
         self.real_memory = [None] * (ram_size // page_size)
         self.virtual_memory = []
-        self.memory_map = {} # Memory map: ptr -> pages
+        self.memory_map = {} # Memory map: pid -> pages
+        self.pointer_map = {} # Ptr -> pid
+        self.pointer_counter = 1
 
     def execute_instruction(self, instruction):
         tokens = instruction.split('(')
         command = tokens[0]
         args = tokens[1].rstrip(')').split(',')
+
         if command == 'new':
             # Extract pid and size from the instruction string
             pid = int(args[0])
             size = int(args[1])
             print(f"Instruction new -> Pid [{pid}], size [{size}]")
-            self.allocate_memory(pid, size)
+            ptr = self.allocate_memory(pid, size)
+            print(f"Memory allocated for PID[{pid}] -> ptr:{ptr}")
         
     def allocate_memory(self, pid, size):
         num_pages = size // self.page_size
@@ -37,6 +41,17 @@ class MemoryManagementUnit:
             pages.append(page)
 
         self.memory_map[pid] = pages
+
+        # Generate and assign a pointer to the process
+        ptr = self.generate_pointer()
+        self.pointer_map[ptr] = pid
+
+        return ptr
+    
+    def generate_pointer(self):
+        ptr = self.pointer_counter
+        self.pointer_counter += 1
+        return ptr
 
     def allocate_page(self):
         for i, page in enumerate(self.real_memory):
@@ -69,3 +84,10 @@ if 1 in mmu.memory_map:
     print("Memory map for pid 1: ", mmu.memory_map[1])
 else:
     print("There is not memory associated to the PID 1")
+
+mmu.execute_instruction('new(2, 4096)')
+mmu.execute_instruction('new(3, 4096)')
+mmu.execute_instruction('new(4, 4096)')
+print("Memory map for pid 4: ", mmu.memory_map[4])
+mmu.execute_instruction('new(1, 24576)')
+print("Memory map for pid 1: ", mmu.memory_map[1])
