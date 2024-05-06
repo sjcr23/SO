@@ -16,7 +16,6 @@ class PageReplacementAlgorithm:
     
     def move_to_real_memory(self, new_page, evicted_page):
         index = self.real_memory.index(evicted_page)
-        new_page.page_id = index
         new_page.in_real_memory = True
         new_page.physical_address = index
         new_page.referenced = False
@@ -25,7 +24,6 @@ class PageReplacementAlgorithm:
         print(f"Page: {new_page.page_id} moved to real memory")
 
     def move_to_virtual_memory(self, page):
-        page.page_id = None
         page.in_real_memory = False
         page.physical_address = None
         self.virtual_memory.append(page)
