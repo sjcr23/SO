@@ -22,7 +22,7 @@ class MemoryManagementUnit:
         if algorithm == 'FIFO':
             self.algorithm = FIFO(ram_size, page_size, self.real_memory, self.virtual_memory)
         elif algorithm == 'SC':
-            self.algorithm = SecondChance(ram_size, page_size)
+            self.algorithm = SecondChance(ram_size, page_size, self.real_memory, self.virtual_memory)
         else:
             raise ValueError("Invalid algorithm specified")
 
@@ -53,6 +53,10 @@ class MemoryManagementUnit:
                 if not page.in_real_memory:
                     # Bring pages into real memory
                     self.bring_into_real_memory(page)
+                else:
+                    page.referenced = True
+                    index = self.algorithm.page_queue.index(page)
+                    self.algorithm.page_queue[index].referenced = True
             print(f"Memory accessed at ptr [{ptr}]")
         else:
             print("Error: Pointer not found in memory map")
@@ -108,7 +112,7 @@ class MemoryManagementUnit:
         return self.add_page_to_virtual_memory()
     
     def add_page_to_memory(self, index):
-        page = Page(page_id=index, in_real_memory=True, physical_address=index)
+        page = Page(page_id=index, in_real_memory=True, physical_address=index, referenced=True)
         self.real_memory[index] = page
         self.algorithm.update_queue(page)
         return page
@@ -131,15 +135,16 @@ class MemoryManagementUnit:
                 del self.memory_map[ptr]
 
 # test
-mmu = MemoryManagementUnit(400*1024, 4096, 'FIFO')
+mmu = MemoryManagementUnit(400*1024, 4096, 'SC')
 print("real memory ", len(mmu.real_memory))
 for i in range(len(mmu.real_memory)):
-    mmu.execute_instruction(f"new({i+1}, {4096})")
+    mmu.execute_instruction(f"new({i+1}, {4096*5})")
 
 mmu.execute_instruction('new(101, 4096)')
 
-print("Real memory before FIFO", mmu.real_memory)
-print("Virtual memory before FIFO", mmu.virtual_memory)
-mmu.execute_instruction('use(101)')
-print("Real memory after FIFO", mmu.real_memory)
-print("Virtual memory after FIFO", mmu.virtual_memory)
+print("Real memory before SC", mmu.real_memory)
+print("Virtual memory before SC", mmu.virtual_memory)
+for key in mmu.pointer_map:
+    mmu.execute_instruction(f'use({mmu.pointer_map[key]})')
+print("Real memory after SC", mmu.real_memory)
+print("Virtual memory after SC", mmu.virtual_memory)
