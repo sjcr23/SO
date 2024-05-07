@@ -1,21 +1,22 @@
-from collections import deque
+from collections import deque, defaultdict
 import random
 
 class PageReplacementAlgorithm:
-    def __init__(self, ram_size, page_size, real_memory, virtual_memory):
+    def __init__(self, ram_size, page_size, real_memory, virtual_memory, memory_map):
         self.ram_size = ram_size
         self.page_size = page_size
         self.real_memory = real_memory
         self.virtual_memory = virtual_memory
+        self.memory_map = memory_map
         self.page_queue = deque()
 
-    def update_queue(self, new_page):
+    def update_queue(self, new_page, ptr):
         if len(self.page_queue) >= self.ram_size // self.page_size:
-            self.evict_page(new_page)
+            self.evict_page(new_page, ptr)
         else:
             self.page_queue.append(new_page)
 
-    def evict_page(self, new_page):
+    def evict_page(self, new_page, ptr):
         raise NotImplementedError("Subclasses must implement evict_page method")
     
     def move_to_real_memory(self, new_page, evicted_page):
@@ -46,10 +47,7 @@ class PageReplacementAlgorithm:
 
 
 class FIFO(PageReplacementAlgorithm):
-    def update_queue(self, new_page):
-        return super().update_queue(new_page)
-
-    def evict_page(self, new_page):
+    def evict_page(self, new_page, ptr):
         if self.page_queue and self.real_memory:
             evicted_page = self.page_queue.popleft()
             print(f"Page to evict: ID: {evicted_page.page_id}")
@@ -68,10 +66,7 @@ class FIFO(PageReplacementAlgorithm):
     
 
 class SecondChance(PageReplacementAlgorithm):
-    def update_queue(self, new_page):
-        return super().update_queue(new_page)
-        
-    def evict_page(self, new_page):
+    def evict_page(self, new_page, ptr):
         while True:
             pageInRealMemory = self.page_queue.popleft()
             if not pageInRealMemory.referenced:
@@ -99,13 +94,29 @@ class SecondChance(PageReplacementAlgorithm):
 
 
 class MRU(PageReplacementAlgorithm):
-    def update_queue(self, new_page):
-        return super().update_queue(new_page)
+    def evict_page(self, new_page, ptr):
+        ptr_related_pages = []
+        if ptr in self.memory_map:
+            ptr_related_pages = self.memory_map[ptr]
 
-    def evict_page(self, new_page):
         if self.page_queue and self.real_memory:
             # Find the most recently used page in the queue (last element)
-            evicted_page = self.page_queue.pop()
+            # that is not one of the pages related to the current ptr request
+            evicted_page = None
+            pages_to_append = []
+            while True:
+                evicted_page = self.page_queue.pop()
+                if evicted_page in ptr_related_pages:
+                    pages_to_append.append(evicted_page)
+                else:
+                    break
+
+            if evicted_page is None:
+                evicted_page = self.page_queue.pop()
+
+            for pages_tmp in pages_to_append:
+                self.page_queue.append(pages_tmp)
+
             print(f"Page to evict: ID: {evicted_page.page_id}")
             # Move the new page from virtual memory to real memory
             self.move_to_real_memory(new_page, evicted_page)
@@ -125,10 +136,7 @@ class MRU(PageReplacementAlgorithm):
     
 
 class RND(PageReplacementAlgorithm):
-    def update_queue(self, new_page):
-        return super().update_queue(new_page)
-
-    def evict_page(self, new_page):
+    def evict_page(self, new_page, ptr):
         if self.page_queue and self.real_memory:
             # Select a random page from the queue
             evicted_page = random.choice(self.page_queue)
@@ -146,3 +154,44 @@ class RND(PageReplacementAlgorithm):
     
     def delete_page(self, page):
         return super().delete_page(page)
+    
+class OPT(PageReplacementAlgorithm):
+    def evict_page(self, new_page, ptr):
+        if self.page_queue and self.real_memory:
+            page_to_evict = self._select_page_to_evict(ptr)
+            self.page_queue.remove(page_to_evict)
+            print(f"Page to evict: ID: {page_to_evict.page_id}")
+            self.move_to_real_memory(new_page, page_to_evict)
+            self.remove_from_virtual_memory(new_page)
+            self.move_to_virtual_memory(page_to_evict)
+
+    def access_page(self, page):
+        return 
+    
+    def delete_page(self, page):
+        return super().delete_page(page)
+
+
+    def _select_page_to_evict(self, ptr):
+        pages_related_to_ptr = []
+        if ptr in self.memory_map:
+            pages_related_to_ptr = self.memory_map[ptr]
+
+        # Evict page with furthest predicted future access index
+        page_to_evict = None
+        for page in self.page_queue:
+            if page.future_accesses:
+                for ptr in reversed(page.future_accesses):
+                    if ptr in self.memory_map:
+                        ptr_pages = self.memory_map[ptr]
+                        for page in reversed(ptr_pages):
+                            if page.in_real_memory and page not in pages_related_to_ptr:
+                                page_to_evict = page
+                                break
+                    if page_to_evict is not None:
+                        break
+            if page_to_evict is not None:
+                break
+        print(f"Page selected to evict: Page [{page_to_evict.page_id}], in real memory: {page_to_evict.in_real_memory}")
+
+        return page_to_evict
