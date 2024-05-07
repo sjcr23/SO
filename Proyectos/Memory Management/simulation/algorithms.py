@@ -1,4 +1,5 @@
 from collections import deque
+import random
 
 class PageReplacementAlgorithm:
     def __init__(self, ram_size, page_size, real_memory, virtual_memory):
@@ -9,7 +10,10 @@ class PageReplacementAlgorithm:
         self.page_queue = deque()
 
     def update_queue(self, new_page):
-        raise NotImplementedError("Subclasses must implement update_queue method")
+        if len(self.page_queue) >= self.ram_size // self.page_size:
+            self.evict_page(new_page)
+        else:
+            self.page_queue.append(new_page)
 
     def evict_page(self, new_page):
         raise NotImplementedError("Subclasses must implement evict_page method")
@@ -35,7 +39,7 @@ class PageReplacementAlgorithm:
         print(f"Page {page.page_id} was removed from virtual memory")
 
     def access_page(self, page):
-        raise NotImplementedError("Subclasses must implement evict_page method")
+        raise NotImplementedError("Subclasses must implement access_page method")
 
     def delete_page(self, page):
         self.page_queue.remove(page)
@@ -43,10 +47,7 @@ class PageReplacementAlgorithm:
 
 class FIFO(PageReplacementAlgorithm):
     def update_queue(self, new_page):
-        if len(self.page_queue) >= self.ram_size // self.page_size:
-            self.evict_page(new_page)
-        else:
-            self.page_queue.append(new_page)
+        return super().update_queue(new_page)
 
     def evict_page(self, new_page):
         if self.page_queue and self.real_memory:
@@ -60,7 +61,7 @@ class FIFO(PageReplacementAlgorithm):
             self.move_to_virtual_memory(evicted_page)
 
     def access_page(self, page):
-        return super().access_page(page)
+        return 
     
     def delete_page(self, page):
         return super().delete_page(page)
@@ -68,10 +69,7 @@ class FIFO(PageReplacementAlgorithm):
 
 class SecondChance(PageReplacementAlgorithm):
     def update_queue(self, new_page):
-        if len(self.page_queue) >= self.ram_size // self.page_size:
-            self.evict_page(new_page) # Check and evict a page if necessary
-        else:
-            self.page_queue.append(new_page)
+        return super().update_queue(new_page)
         
     def evict_page(self, new_page):
         while True:
@@ -101,15 +99,8 @@ class SecondChance(PageReplacementAlgorithm):
 
 
 class MRU(PageReplacementAlgorithm):
-    def __init__(self, ram_size, page_size, real_memory, virtual_memory):
-        super().__init__(ram_size, page_size, real_memory, virtual_memory)
-
     def update_queue(self, new_page):
-        if len(self.page_queue) >= self.ram_size // self.page_size:
-            self.evict_page(new_page)
-        else:
-            self.page_queue.append(new_page)
-            self.mru_pointer = self.page_queue.index(new_page)
+        return super().update_queue(new_page)
 
     def evict_page(self, new_page):
         if self.page_queue and self.real_memory:
@@ -129,5 +120,29 @@ class MRU(PageReplacementAlgorithm):
         self.page_queue.remove(page)
         self.page_queue.append(page)
 
+    def delete_page(self, page):
+        return super().delete_page(page)
+    
+
+class RND(PageReplacementAlgorithm):
+    def update_queue(self, new_page):
+        return super().update_queue(new_page)
+
+    def evict_page(self, new_page):
+        if self.page_queue and self.real_memory:
+            # Select a random page from the queue
+            evicted_page = random.choice(self.page_queue)
+            self.page_queue.remove(evicted_page)
+            print(f"Random page to evict: ID: {evicted_page.page_id}")
+            # Move the new page from virtual memory to real memory
+            self.move_to_real_memory(new_page, evicted_page)
+            # Remove the page from virtual memory
+            self.remove_from_virtual_memory(new_page)
+            # Move evicted page to virtual memory
+            self.move_to_virtual_memory(evicted_page)
+
+    def access_page(self, page):
+        return 
+    
     def delete_page(self, page):
         return super().delete_page(page)

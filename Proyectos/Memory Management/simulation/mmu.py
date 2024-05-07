@@ -1,5 +1,5 @@
 # app/mmu.py
-from algorithms import FIFO, SecondChance, MRU
+from algorithms import FIFO, SecondChance, MRU, RND
 class Page:
     def __init__(self, page_id, pid, ptr, in_real_memory,  physical_address=None, timestamp=None, referenced=False):
         self.pid = pid
@@ -28,6 +28,8 @@ class MemoryManagementUnit:
             self.algorithm = SecondChance(ram_size, page_size, self.real_memory, self.virtual_memory)
         elif algorithm == 'MRU':
             self.algorithm = MRU(ram_size, page_size, self.real_memory, self.virtual_memory)
+        elif algorithm == 'RND':
+            self.algorithm = RND(ram_size, page_size, self.real_memory, self.virtual_memory)
         else:
             raise ValueError("Invalid algorithm specified")
 
@@ -185,7 +187,7 @@ class MemoryManagementUnit:
             return
 
 # test
-alg = 'MRU'
+alg = 'RND'
 mmu = MemoryManagementUnit(400*1024, 4096, alg)
 print("real memory ", len(mmu.real_memory))
 for i in range(len(mmu.real_memory)):
