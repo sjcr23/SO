@@ -1,7 +1,7 @@
 # app/mmu.py
 from algorithms import FIFO, SecondChance, MRU
 class Page:
-    def __init__(self, page_id, in_real_memory, pid, ptr, physical_address=None, timestamp=None, referenced=False):
+    def __init__(self, page_id, pid, ptr, in_real_memory,  physical_address=None, timestamp=None, referenced=False):
         self.pid = pid
         self.ptr = ptr
         self.page_id = page_id # Unique identifier for the page
