@@ -45,6 +45,11 @@ class MemoryManagementUnit:
             print(f"Instruction use -> ptr [{ptr}]")
             self.access_memory(ptr)
 
+        elif command == 'delete':
+            ptr = int(args[0])
+            print(f"Instruction delete -> ptr [{ptr}]")
+            self.delete_ptr(ptr)
+
     def allocate_memory(self, pid, size):
         # Calculate the number of pages to assign
         num_pages = size // self.page_size
@@ -122,17 +127,47 @@ class MemoryManagementUnit:
             # Evict a page using the corresponding algorithm
             self.algorithm.evict_page(page)
 
+    def delete_ptr(self, ptr):
+        # We first delete the pages related to the ptr
+        self.delete_pages(ptr)
+        
+        # Finally, we delete the ptr associated with a PID
+        keys_to_delete = []
+        if self.pointer_map:
+            for key, value in self.pointer_map.items():
+                if value == ptr:
+                    keys_to_delete.append(key)
+        for key in keys_to_delete:
+            print(f"Deleting ptr[{ptr}] related to PID [{key}] from pointer map")
+            del self.pointer_map[key]
+
     def delete_memory(self, pid):
         if pid in self.pointer_map:
+            print(f"Deleting memory for PID [{pid}]")
             ptr = self.pointer_map.pop(pid)
-            if ptr in self.memory_map:
-                pages = self.memory_map[ptr]
-                for page in pages:
-                    if page.in_real_memory:
-                        self.real_memory[page.physical_address] = None
-                    else:
-                        self.virtual_memory.remove(page)
-                del self.memory_map[ptr]
+            self.delete_pages(ptr)
+        else:
+            print(f"PID [{pid}] does not exist")
+
+    def delete_pages(self, ptr):
+        if ptr in self.memory_map:
+            print(f"Freeing memory allocated for pages associated with ptr[{ptr}]")
+            pages = self.memory_map[ptr]
+            print(f"Pages associated to ptr [{ptr}]: ", [page.page_id for page in pages])
+            for page in pages:
+                if page.in_real_memory:
+                    self.real_memory[page.physical_address] = None
+                    # update queue for the current algorithm
+                    self.algorithm.page_queue.remove(page)
+                else:
+                    self.virtual_memory.remove(page)
+            print(f"All pages associated to ptr [{ptr}] were removed from memory")
+            # then proceed to delete the ptr in the memory map
+            print(f"Deleting ptr[{ptr}] from memory map")
+            del self.memory_map[ptr]
+        else:
+            print(f"Pointer [{ptr}] does not exist in memory")
+            return
 
 # test
 mmu = MemoryManagementUnit(400*1024, 4096, 'SC')
@@ -148,3 +183,7 @@ for key in mmu.pointer_map:
     mmu.execute_instruction(f'use({mmu.pointer_map[key]})')
 print("Real memory after SC", [page.page_id for page in mmu.real_memory])
 print("Virtual memory after SC", [page.page_id for page in mmu.virtual_memory])
+print("Queue for SC algorithm before delete instruction: ", [page.page_id for page in mmu.algorithm.page_queue])
+print("\n")
+mmu.execute_instruction('delete(100)')
+print("Queue for SC algorithm after delete instruction: ", [page.page_id for page in mmu.algorithm.page_queue])

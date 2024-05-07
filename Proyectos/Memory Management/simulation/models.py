@@ -23,7 +23,7 @@ class Process:
         self.pid = pid
         self.instructions = []
     
-    def add_instruction(self, instruction) -> None:
+    def add_instruction(self, instruction):
         self.instructions.append(instruction)
 
     
