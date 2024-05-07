@@ -34,6 +34,12 @@ class PageReplacementAlgorithm:
         self.virtual_memory.remove(page)
         print(f"Page {page.page_id} was removed from virtual memory")
 
+    def access_page(self, page):
+        raise NotImplementedError("Subclasses must implement evict_page method")
+
+    def delete_page(self, page):
+        self.page_queue.remove(page)
+
 
 class FIFO(PageReplacementAlgorithm):
     def update_queue(self, new_page):
@@ -52,6 +58,12 @@ class FIFO(PageReplacementAlgorithm):
             self.remove_from_virtual_memory(new_page)
             # Move evicted page to virtual memory
             self.move_to_virtual_memory(evicted_page)
+
+    def access_page(self, page):
+        return super().access_page(page)
+    
+    def delete_page(self, page):
+        return super().delete_page(page)
     
 
 class SecondChance(PageReplacementAlgorithm):
@@ -79,3 +91,43 @@ class SecondChance(PageReplacementAlgorithm):
                 print(f"Giving a second chance to page {pageInRealMemory.page_id}")
                 pageInRealMemory.referenced = False
                 self.page_queue.append(pageInRealMemory)
+
+    def access_page(self, page):
+        index = self.page_queue.index(page)
+        self.page_queue[index].referenced = True
+
+    def delete_page(self, page):
+        return super().delete_page(page)
+
+
+class MRU(PageReplacementAlgorithm):
+    def __init__(self, ram_size, page_size, real_memory, virtual_memory):
+        super().__init__(ram_size, page_size, real_memory, virtual_memory)
+
+    def update_queue(self, new_page):
+        if len(self.page_queue) >= self.ram_size // self.page_size:
+            self.evict_page(new_page)
+        else:
+            self.page_queue.append(new_page)
+            self.mru_pointer = self.page_queue.index(new_page)
+
+    def evict_page(self, new_page):
+        if self.page_queue and self.real_memory:
+            # Find the most recently used page in the queue (last element)
+            evicted_page = self.page_queue.pop()
+            print(f"Page to evict: ID: {evicted_page.page_id}")
+            # Move the new page from virtual memory to real memory
+            self.move_to_real_memory(new_page, evicted_page)
+            # Remove the page from virtual memory
+            self.remove_from_virtual_memory(new_page)
+            # Move evicted page to virtual memory
+            self.move_to_virtual_memory(evicted_page)
+
+    def access_page(self, page):
+        # move the element to the front of the stack
+        # it means it's the last element to be used
+        self.page_queue.remove(page)
+        self.page_queue.append(page)
+
+    def delete_page(self, page):
+        return super().delete_page(page)
