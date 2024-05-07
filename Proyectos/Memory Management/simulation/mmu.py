@@ -36,19 +36,27 @@ class MemoryManagementUnit:
             # Extract pid and size from the instruction string
             pid = int(args[0])
             size = int(args[1])
-            print(f"Instruction new -> Pid [{pid}], size [{size}]")
+            print(f"\nInstruction new -> Pid [{pid}], size [{size}]")
             ptr = self.allocate_memory(pid, size)
-            print(f"Memory allocated for PID[{pid}] -> ptr:{ptr}")
+            print(f"\nMemory allocated for PID[{pid}] -> ptr:{ptr}")
         
         elif command == 'use':
             ptr = int(args[0])
-            print(f"Instruction use -> ptr [{ptr}]")
+            print(f"\nInstruction use -> ptr [{ptr}]")
             self.access_memory(ptr)
 
         elif command == 'delete':
             ptr = int(args[0])
-            print(f"Instruction delete -> ptr [{ptr}]")
+            print(f"\nInstruction delete -> ptr [{ptr}]")
             self.delete_ptr(ptr)
+        
+        elif command == 'kill':
+            pid = int(args[0])
+            print(f"\nInstruction kill -> PID [{pid}]")
+            self.delete_memory(pid)
+
+        else:
+            print(f"\nCommand [{command}] not recognized. Only available commands are:\n\t- new(pid, size) -> ptr\n\t- use(ptr) -> void\n\t- delete(ptr) -> void\n\t- kill(pid) -> void")
 
     def allocate_memory(self, pid, size):
         # Calculate the number of pages to assign
@@ -145,6 +153,7 @@ class MemoryManagementUnit:
         if pid in self.pointer_map:
             print(f"Deleting memory for PID [{pid}]")
             ptr = self.pointer_map.pop(pid)
+            print(f"Deleting memory associated to PID [{pid}] with ptr [{ptr}]")
             self.delete_pages(ptr)
         else:
             print(f"PID [{pid}] does not exist")
@@ -187,3 +196,6 @@ print("Queue for SC algorithm before delete instruction: ", [page.page_id for pa
 print("\n")
 mmu.execute_instruction('delete(100)')
 print("Queue for SC algorithm after delete instruction: ", [page.page_id for page in mmu.algorithm.page_queue])
+mmu.execute_instruction('use(100)')
+mmu.execute_instruction('kill(1)')
+mmu.execute_instruction('use(1)')
