@@ -1,14 +1,14 @@
 # app/models.py
-from mmu import MemoryManagementUnit as MMU
+from simulation.mmu import MemoryManagementUnit as MMU
 
 class Computer:
-    def __init__(self, num_cores=1, ips=1, disk_access_time=5, ram_size=400*1024, page_size=4096):
+    def __init__(self, num_cores=1, ips=1, disk_access_time=5, ram_size=400*1024, page_size=4096, algorithm='FIFO'):
         self.num_cores = num_cores
         self.ips = ips # instructions per second
         self.disk_access_time = disk_access_time
         self.ram_size = ram_size
         self.page_size = page_size
-        self.mmu = MMU(ram_size, page_size)
+        self.mmu = MMU(ram_size, page_size, algorithm)
         self.processes = {}
         self.next_pid = 1
 

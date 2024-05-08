@@ -20,11 +20,13 @@
 <div class="container">
     <div class="column column1">
         <h2>Simulation file</h2>
-        <div>
+        <form id="fileForm" method="post" action="/upload-file" enctype="multipart/form-data">
             <input type="file" id="fileInput" name="file">
-        </div>
-        <br>
-        <button id="saveConfigs">Save setup</button> 
+            <br>
+            <button id="saveFile">Save file</button> 
+            <br>
+
+        </form>
     </div>
     <div id="generation" class="column column1">
         <h2>Generate a random simulation file</h2>
@@ -42,7 +44,7 @@
         <button id="createButton">Create File</button> 
         <button onclick="window.location.href='/download-file'">Download File</button>
     </div>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/setup.js') }}"></script>
 </div>
 
 {% endblock %}}
