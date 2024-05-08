@@ -1,7 +1,5 @@
 # app/mmu.py
-from simulation.algorithms import FIFO, SecondChance, MRU
-
-
+from algorithms import FIFO, SecondChance, MRU, RND, OPT
 class Page:
     def __init__(self, page_id, pid, ptr, in_real_memory,  physical_address=None, timestamp=None, referenced=False):
         self.pid = pid
@@ -11,9 +9,11 @@ class Page:
         self.physical_address = physical_address
         self.timestamp = timestamp # Timestamp indicating when the page was allocated
         self.referenced = referenced # Flag indicating whether the page has been referenced recently
+        self.future_accesses = []  # List to store predicted future access indices
+        # add more attributes as needed
 
 class MemoryManagementUnit:
-    def __init__(self, ram_size, page_size, algorithm):
+    def __init__(self, ram_size, page_size, algorithm, instructions=None):
         self.ram_size = ram_size
         self.page_size = page_size
         self.real_memory = [None] * (ram_size // page_size)
@@ -23,12 +23,18 @@ class MemoryManagementUnit:
         self.pointer_counter = 1
         self.page_counter = 1
         self.algorithm = None
+        self.algorithm_name = algorithm
+        self.instructions = instructions # list of instructions for OPT algorithm
         if algorithm == 'FIFO':
-            self.algorithm = FIFO(ram_size, page_size, self.real_memory, self.virtual_memory)
+            self.algorithm = FIFO(ram_size, page_size, self.real_memory, self.virtual_memory, self.memory_map)
         elif algorithm == 'SC':
-            self.algorithm = SecondChance(ram_size, page_size, self.real_memory, self.virtual_memory)
+            self.algorithm = SecondChance(ram_size, page_size, self.real_memory, self.virtual_memory, self.memory_map)
         elif algorithm == 'MRU':
-            self.algorithm = MRU(ram_size, page_size, self.real_memory, self.virtual_memory)
+            self.algorithm = MRU(ram_size, page_size, self.real_memory, self.virtual_memory, self.memory_map)
+        elif algorithm == 'RND':
+            self.algorithm = RND(ram_size, page_size, self.real_memory, self.virtual_memory, self.memory_map)
+        elif algorithm == 'OPT':
+            self.algorithm = OPT(ram_size, page_size, self.real_memory, self.virtual_memory, self.memory_map)
         else:
             raise ValueError("Invalid algorithm specified")
 
@@ -99,7 +105,7 @@ class MemoryManagementUnit:
         page = Page(self.page_counter, pid, ptr, in_real_memory=True, physical_address=physical_address, referenced=True)
         self.page_counter += 1
         self.real_memory[physical_address] = page
-        self.algorithm.update_queue(page)
+        self.algorithm.update_queue(page, ptr)
         return page
 
     def add_page_to_virtual_memory(self, pid, ptr):
@@ -117,7 +123,7 @@ class MemoryManagementUnit:
             for page in pages:
                 if not page.in_real_memory:
                     # Bring pages into real memory
-                    self.bring_into_real_memory(page)
+                    self.bring_into_real_memory(page, ptr)
                 else:
                     page.referenced = True
                     self.algorithm.access_page(page)
@@ -125,14 +131,14 @@ class MemoryManagementUnit:
         else:
             print("Error: Pointer not found in memory map")
 
-    def bring_into_real_memory(self, page):
+    def bring_into_real_memory(self, page, ptr):
         if None in self.memory_map:
             # Find an empty slot in real memory
             index = self.real_memory.index(None)
             page.in_real_memory = True
             page.physical_address = index
             self.real_memory[index] = page
-            self.algorithm.update_queue(page)
+            self.algorithm.update_queue(page, ptr)
             print(f"Page {page.page_id} was brought back to real memory")
 
             # Remove the page from virtual memory
@@ -140,7 +146,7 @@ class MemoryManagementUnit:
             print(f"Page {page.page_id} was removed from virtual memory")
         else:
             # Evict a page using the corresponding algorithm
-            self.algorithm.evict_page(page)
+            self.algorithm.evict_page(page, ptr)
 
     def delete_ptr(self, ptr):
         # We first delete the pages related to the ptr
@@ -184,9 +190,25 @@ class MemoryManagementUnit:
         else:
             print(f"Pointer [{ptr}] does not exist in memory")
             return
+        
+    def simulate_access_patterns(self):
+        # Simulate access patterns based on the parsed instructions
+        for i, instruction in enumerate(self.instructions):
+            tokens = instruction.split('(')
+            command = tokens[0]
+            args = tokens[1].rstrip(')').split(',')
+
+            if command == 'use':
+                ptr = int(args[0])
+                # Predict future accesses based on the order of instructions
+                future_accesses = [int(args_tmp.split('(')[1].split(')')[0]) for args_tmp in self.instructions[i + 1:] if args_tmp.startswith('use')]
+                if ptr in self.memory_map:
+                    pages = self.memory_map[ptr]
+                    for page in pages:
+                        page.future_accesses = future_accesses
 
 # test
-alg = 'MRU'
+alg = 'OPT'
 mmu = MemoryManagementUnit(400*1024, 4096, alg)
 print("real memory ", len(mmu.real_memory))
 for i in range(len(mmu.real_memory)):
@@ -196,17 +218,28 @@ mmu.execute_instruction('new(101, 4096)')
 
 print(f"Real memory before {alg}", [page.page_id if page is not None else None for page in mmu.real_memory])
 print(f"Virtual memory before {alg}", [page.page_id for page in mmu.virtual_memory])
+instructions = []
+for key in mmu.pointer_map:
+    instructions.append(f'use({mmu.pointer_map[key]})')
+
+mmu.instructions = instructions
+mmu.simulate_access_patterns()
+
 for key in mmu.pointer_map:
     mmu.execute_instruction(f'use({mmu.pointer_map[key]})')
 print(f"Real memory after {alg}", [page.page_id if page is not None else None for page in mmu.real_memory])
 print(f"Virtual memory after {alg}", [page.page_id for page in mmu.virtual_memory])
-print(f"Queue for {alg} algorithm before delete instruction: ", [page.page_id for page in mmu.algorithm.page_queue])
-print("\n")
-mmu.execute_instruction('delete(100)')
-print(f"Queue for {alg} algorithm after delete instruction: ", [page.page_id for page in mmu.algorithm.page_queue])
-mmu.execute_instruction('use(100)')
-mmu.execute_instruction('kill(1)')
-print("Real memory after kill instruction: ", [page.page_id if page is not None else None for page in mmu.real_memory])
-print("Algorithm queue state: ", [page.page_id for page in mmu.algorithm.page_queue])
-mmu.execute_instruction('use(1)')
+# print(f"Queue for {alg} algorithm before delete instruction: ", [page.page_id for page in mmu.algorithm.page_queue])
+# print("\n")
+# mmu.execute_instruction('delete(100)')
+# print(f"Queue for {alg} algorithm after delete instruction: ", [page.page_id for page in mmu.algorithm.page_queue])
+# mmu.execute_instruction('use(100)')
+# mmu.execute_instruction('kill(1)')
+# print("Real memory after kill instruction: ", [page.page_id if page is not None else None for page in mmu.real_memory])
+# print("Algorithm queue state: ", [page.page_id for page in mmu.algorithm.page_queue])
+# mmu.execute_instruction('use(1)')
 mmu.execute_instruction('use(55)')
+
+print("\nReal memory current state: ", [page.page_id if page is not None else None for page in mmu.real_memory])
+print(f"\nAlgorithm queue current state: ", [page.page_id for page in mmu.algorithm.page_queue])
+print(f"Page [{mmu.real_memory[-1].page_id}] has physical address {mmu.real_memory[-1].physical_address}")
