@@ -23,20 +23,23 @@ class PageReplacementAlgorithm:
         index = self.real_memory.index(evicted_page)
         new_page.in_real_memory = True
         new_page.physical_address = index
+        new_page.virtual_address = None
         new_page.referenced = False
         self.real_memory[index] = new_page
         self.page_queue.append(new_page)
         print(f"Page: {new_page.page_id} moved to real memory")
 
     def move_to_virtual_memory(self, page):
+        virtual_address = self.virtual_memory.index(None)
         page.in_real_memory = False
         page.physical_address = None
-        self.virtual_memory.append(page)
-        print(f"Evicted page moved to virtual memory")
+        page.virtual_address = virtual_address
+        self.virtual_memory[virtual_address] = page
+        print(f"Evicted page moved to virtual memory at position {page.virtual_address}")
 
     def remove_from_virtual_memory(self, page):
         # Remove the page from virtual memory
-        self.virtual_memory.remove(page)
+        self.virtual_memory[page.virtual_address] = None
         print(f"Page {page.page_id} was removed from virtual memory")
 
     def access_page(self, page):
@@ -51,10 +54,10 @@ class FIFO(PageReplacementAlgorithm):
         if self.page_queue and self.real_memory:
             evicted_page = self.page_queue.popleft()
             print(f"Page to evict: ID: {evicted_page.page_id}")
-            # Move the new page from virtual memory to real memory
-            self.move_to_real_memory(new_page, evicted_page)
             # Remove the page from virtual memory
             self.remove_from_virtual_memory(new_page)
+            # Move the new page from virtual memory to real memory
+            self.move_to_real_memory(new_page, evicted_page)
             # Move evicted page to virtual memory
             self.move_to_virtual_memory(evicted_page)
 
@@ -72,10 +75,10 @@ class SecondChance(PageReplacementAlgorithm):
             if not pageInRealMemory.referenced:
                 print(f"Page {pageInRealMemory.page_id} is going to be evicted from real memory")
                 # if the page is not referenced, it can be evicted
-                # Move the new page from virtual memory to real memory
-                self.move_to_real_memory(new_page, pageInRealMemory)
                 # Remove the page from virtual memory
                 self.remove_from_virtual_memory(new_page)
+                # Move the new page from virtual memory to real memory
+                self.move_to_real_memory(new_page, pageInRealMemory)
                 # Move evicted page to virtual memory
                 self.move_to_virtual_memory(pageInRealMemory)
                 return
@@ -118,10 +121,10 @@ class MRU(PageReplacementAlgorithm):
                 self.page_queue.append(pages_tmp)
 
             print(f"Page to evict: ID: {evicted_page.page_id}")
-            # Move the new page from virtual memory to real memory
-            self.move_to_real_memory(new_page, evicted_page)
             # Remove the page from virtual memory
             self.remove_from_virtual_memory(new_page)
+            # Move the new page from virtual memory to real memory
+            self.move_to_real_memory(new_page, evicted_page)
             # Move evicted page to virtual memory
             self.move_to_virtual_memory(evicted_page)
 
@@ -142,10 +145,10 @@ class RND(PageReplacementAlgorithm):
             evicted_page = random.choice(self.page_queue)
             self.page_queue.remove(evicted_page)
             print(f"Random page to evict: ID: {evicted_page.page_id}")
-            # Move the new page from virtual memory to real memory
-            self.move_to_real_memory(new_page, evicted_page)
             # Remove the page from virtual memory
             self.remove_from_virtual_memory(new_page)
+            # Move the new page from virtual memory to real memory
+            self.move_to_real_memory(new_page, evicted_page)
             # Move evicted page to virtual memory
             self.move_to_virtual_memory(evicted_page)
 
@@ -161,8 +164,8 @@ class OPT(PageReplacementAlgorithm):
             page_to_evict = self._select_page_to_evict(ptr)
             self.page_queue.remove(page_to_evict)
             print(f"Page to evict: ID: {page_to_evict.page_id}")
-            self.move_to_real_memory(new_page, page_to_evict)
             self.remove_from_virtual_memory(new_page)
+            self.move_to_real_memory(new_page, page_to_evict)
             self.move_to_virtual_memory(page_to_evict)
 
     def access_page(self, page):
