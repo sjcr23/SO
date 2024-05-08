@@ -1,98 +1,96 @@
-// // Crea en HTML la tabla, con nombre
-// function createMemoryTable(name) {
-//     const container = document.getElementById('tableContainer');
-//     const title = document.createElement('div');
-//     title.className = 'table-title';
-//     title.textContent = name;
-//     container.appendChild(title);
+var currentColor = 0;
+var COLORS = ['aqua', 'crimson', 'darkGreen', 'blueViolet', 'aquamarine', 'DarkSlateBlue', 'goldenRod', 'hotPink', 'greenYellow', 'DodgerBlue', 'OrangeRed'];
 
-//     const table = document.createElement('table');
-//     const tbody = document.createElement('tbody');
-//     table.appendChild(tbody);
-
-//     const row = tbody.insertRow();
-//     for (let j = 1; j <= 100; j++) {
-//         const cell = row.insertCell();
-//         cell.textContent = '';
-//     }
-//     container.appendChild(table);
-//     return table;
-// }
-
-// // Actualiza la función de cambio de color para aceptar el objeto de tabla
-// function changeCellColor(table, row, col, color) {
-//     if (row >= 1 && row <= table.rows.length && col >= 1 && col <= table.rows[row - 1].cells.length) {
-//         const cell = table.rows[row - 1].cells[col - 1];
-//         cell.style.backgroundColor = color;
-//     }
-// }
-
-// function sleep(ms) {
-//     return new Promise(resolve => setTimeout(resolve, ms));
-// }
+function getColor() {
+    const color = COLORS[currentColor % COLORS.length];
+    currentColor++;
+    return color;
+}
 
 
-// async function fill_memory(item, color) {
-//     for (let i = 24; i <=43; i++) {
-//         await sleep(45);
-//         changeCellColor(item, 1, i, color);
-//     }
-// }
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-// async function free_memory(item) {
-//     for (let i = 100; i >= 0; i--) {
-//         await sleep(45);
-//         changeCellColor(item, 1, i, "white");
-//     }
-// }
+function changeCellColor(table, row, col, color) {
+    // Asegurarse que el elemento de la tabla esté correctamente referenciado
+    if (table.length > 0) {
+        let targetTable = table[0]; // Asumimos que necesitamos el primer elemento si hay varios
+        let targetRow = targetTable.rows[row]; // Acceder a la fila específica por índice
+        if (targetRow && targetRow.cells[col]) { // Asegurarse que la celda existe
+            let targetCell = targetRow.cells[col]; // Acceder a la celda específica
+            targetCell.style.backgroundColor = color; // Cambiar el color de fondo
+        }
+    }
+}
 
-// document.addEventListener("DOMContentLoaded", function () {
-//     const table1 = createMemoryTable('RAM - [OPT]');
-//     const algSelector = document.getElementById('algSelector');
-//     var created = false;
-//     var tables = [table1]
+async function update_mem(pc, index) {
+    const real_memory = pc.real_memory
+    const columns = document.getElementById('tableContainer').getElementsByClassName('column');
+    const table = columns[index].getElementsByTagName('table');
 
-//     const createButton = document.getElementById('createButton');
-//     createButton.addEventListener('click', function() {
-//         if (!created){
-//             const table2 = createMemoryTable(`RAM - [${algSelector.value}]`);
-//             tables.push(table2)
-//             created= true;
-//         }
-//     });
-// });
+    console.log(columns)
+    real_memory.forEach(async state => {
+        
+        // Start always at same color
+        currentColor = 0;
+        let color = getColor();
+        let lastNumber = state[0];
+        
+        for (let i = 0; i < state.length; i++) {
+            if (lastNumber != state[i]) {
+                color = getColor();
+            }
 
+            changeCellColor(table, 1, i, color);
+        }
 
-document.getElementById('createButton').addEventListener('click', function() {
-    const algSelector = document.getElementById('algSelector').value;
-    const seedInput = document.getElementById('seedInput').value;
-    const numProcess = document.getElementById('numProcess').value;
-    const numInstructions = document.getElementById('numInstructions').value;
-    
-    const container = document.getElementById('generation')
-    const msg = document.createElement('p');
-    msg.style = "font-family: monospace;"
-    msg.textContent = `File generated: {alg:${algSelector}, seed:${seedInput}, P:${numProcess}, N:${numInstructions}}`
-    container.appendChild(msg)
-    const data = {
-        algorithm: algSelector,
-        seed: seedInput,
-        processes: numProcess,
-        instructions: numInstructions
-    };
-
-    fetch('/setup', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
     });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    let playButton = document.getElementById('playButton');
+    let pauseButton = document.getElementById('pauseButton');
+    let restartButton = document.getElementById('restartButton');
+
+
+    if (playButton) {
+        playButton.addEventListener('click', function() {
+            fetch('/get-color')
+            .then(response => response.json())
+            .then(async data => {
+                const memory = data.memory_state;
+                console.log(memory)
+                const PC0 = memory.PC0
+                const PC1 = memory.PC1
+                update_mem(PC0, 0);
+                update_mem(PC1, 1);
+            });
+        });
+    }   
+    
+    if (pauseButton) {
+        pauseButton.addEventListener('click', function() {
+            // Acceder a todas las columnas dentro del contenedor 'tableContainer'
+            const columns = document.getElementById('tableContainer').getElementsByClassName('column');
+            const tables = columns[1].getElementsByTagName('table');
+            fill_memory(tables[0], 'red');
+        });
+    }
+    
+       
+    if (restartButton) {
+        restartButton.addEventListener('click', function() {
+            // Acceder a todas las columnas dentro del contenedor 'tableContainer'
+            const columns = document.getElementById('tableContainer').getElementsByClassName('column');
+            const table0 = columns[0].getElementsByTagName('table')[0];
+            const table1 = columns[1].getElementsByTagName('table')[0];
+            free_memory(table0);
+            free_memory(table1);
+        });
+    }
+    
 });
+
+

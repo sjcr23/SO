@@ -1,5 +1,7 @@
 # app/mmu.py
-from algorithms import FIFO, SecondChance, MRU
+from simulation.algorithms import FIFO, SecondChance, MRU
+
+
 class Page:
     def __init__(self, page_id, pid, ptr, in_real_memory,  physical_address=None, timestamp=None, referenced=False):
         self.pid = pid
@@ -9,7 +11,6 @@ class Page:
         self.physical_address = physical_address
         self.timestamp = timestamp # Timestamp indicating when the page was allocated
         self.referenced = referenced # Flag indicating whether the page has been referenced recently
-        # add more attributes as needed
 
 class MemoryManagementUnit:
     def __init__(self, ram_size, page_size, algorithm):
