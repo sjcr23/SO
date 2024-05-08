@@ -47,13 +47,12 @@ def get_pages(mem_map):
     
     return r
 
-
 def excecute_file(mmu):
     global current_color
     mmu_state = {'real_memory':[], 'memory_map':[], 'pointer_map':[]}
     
     # Simulate PC file read
-    for i in range(230):
+    for i in range(len(mmu.real_memory)):
         mmu.execute_instruction(f"new({i+1}, {4096*5})")
         mmu_state['memory_map'].append(get_pages(mmu.memory_map))
         mmu_state['real_memory'].append(get_ptr(mmu.real_memory))
